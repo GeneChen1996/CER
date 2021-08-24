@@ -4,7 +4,13 @@ import pandas as pd
 import numpy as np 
 import asr_service_v2 as asr_service #load model
 import re
-#import recorder
+
+
+"""---------------參數配置------------------"""
+#注意：有任何檔案地址的部分都要記得更改成自己電腦檔案的地址
+corpus_dir='C:/Users/Gene/Desktop/asr_wav2vec2-master-c3f9f0c267a23664f51ed5277d0037b5c363cefd/scripts/zh-TW_cer'
+wav_dir='C:/Users/Gene/Desktop/asr_wav2vec2-master-c3f9f0c267a23664f51ed5277d0037b5c363cefd/scripts/zh-TW_cer/clips'
+"""---------------------------------------"""
 
 sum_Levenshtein_distance = 0
 sum_total_words = 0
@@ -44,7 +50,7 @@ def CER(hypothesis,reference):
 
 if __name__ =="__main__":
     print("模型載入完畢")
-    raw_data = pd.read_csv('C:/Users/Gene/Desktop/asr_wav2vec2-master-c3f9f0c267a23664f51ed5277d0037b5c363cefd/scripts/zh-TW_cer/train.tsv',sep='\t')
+    raw_data = pd.read_csv(corpus_dir + '/test.tsv',sep='\t')
     raw_data = raw_data.values
     data_path = raw_data[:,1]    #[第幾筆資料,資料的參數ex.路徑、測試者年齡與性別][資料中的第幾個字]
     data_label = raw_data[:,2]
@@ -56,13 +62,13 @@ if __name__ =="__main__":
             for n in range(int(start)-1,int(end)):    #自訂義執行語料文檔中的哪幾筆資料
                 print("執行第"+str(n+1)+"筆資料")
                 # print(str(n+1))
-                data=asr_service.load_file_to_data('C:/Users/Gene/Desktop/asr_wav2vec2-master-c3f9f0c267a23664f51ed5277d0037b5c363cefd/scripts/zh-TW_cer/clips/'+data_path[n] +'.mp3.wav')  #將音檔丟入模型辨識
+                data=asr_service.load_file_to_data(wav_dir+'/'+data_path[n] +'.mp3.wav')  #將音檔丟入模型辨識
                 reference = data_label[n]    # reference 表示解答數據
                 reference = re.sub(chars_to_ignore_regex, "", reference)
                 hypothesis = asr_service.predict(data)    # hypothesis 表示預測數據          
                 hypothesis = list(hypothesis[0])    #將預測數據存入list以便於計算CER
-                # print(reference)    #顯示label
-                # print(hypothesis)    #顯示預測數據
+                print(reference)    #顯示label
+                print(hypothesis)    #顯示預測數據
                 Levenshtein_distance,total_words = CER(hypothesis,reference)    #比較字串獲得CER
                 sum_Levenshtein_distance += Levenshtein_distance    #加總萊文斯坦距離
                 sum_total_words += total_words    #加總解答的字數
